@@ -66,36 +66,4 @@ router.get("/:id", async (request, response) => {
   }
 });
 
-const multer = require("multer");
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "images");
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
-  }
-});
-const upload = multer({ storage: storage });
-
-router.post("/new", upload.single("photo"), async (request, response) => {
-  if (!request.file) {
-    return response.status(400).send("No file uploaded");
-  }
-
-  try {
-    const newPhoto = await Photo.create({
-      file_name: request.file.filename,
-      date_time: new Date().toISOString(),
-      user_id: request.session.user._id,
-      comments: []
-    });
-
-    response.status(200).send(newPhoto);
-  } catch (error) {
-    console.error("Error creating photo:", error);
-    response.status(500).send("Internal server error");
-  }
-});
-
 module.exports = router;
