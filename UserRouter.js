@@ -14,45 +14,6 @@ router.get("/list", async (request, response) => {
   }
 });
 
-router.get("/listWithCounts", async (request, response) => {
-  try {
-    const users = await User.find({}).select("_id first_name last_name").lean();
-    const allPhotos = await Photo.find({}).select("user_id comments").lean();
-
-    const usersWithCounts = users.map((user) => {
-      const userId = user._id.toString();
-
-      const photoCount = allPhotos.filter(
-        (p) => p.user_id.toString() === userId
-      ).length;
-
-      let commentCount = 0;
-      for (const photo of allPhotos) {
-        if (photo.comments) {
-          for (const comment of photo.comments) {
-            if (comment.user_id && comment.user_id.toString() === userId) {
-              commentCount++;
-            }
-          }
-        }
-      }
-
-      return {
-        _id: user._id,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        photoCount: photoCount,
-        commentCount: commentCount,
-      };
-    });
-
-    response.status(200).json(usersWithCounts);
-  } catch (error) {
-    console.error("Error fetching user list with counts:", error);
-    response.status(500).json({ message: "Internal server error" });
-  }
-});
-
 router.get("/:id", async (request, response) => {
   const id = request.params.id;
 
